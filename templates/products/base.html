@@ -56,6 +56,14 @@
                             </a>
                         </li>
                     {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'users:profile' %}">
+                            <i class="fas fa-shopping-basket"></i>
+                            {% if basket %}
+                                {{ basket.0.total_sum|floatformat:0 }} руб ({{ basket.0.total_quantity }} шт)
+                            {% endif %}
+                        </a>
+                    </li>
                 {% else %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'users:login' %}">Войти <i class="fas fa-sign-in-alt"></i></a>

@@ -1,10 +1,12 @@
+from django.core.mail import send_mail
 from django.shortcuts import render, HttpResponseRedirect
 from users.forms import UserLoginForm, UserRegistrationForm, UserProfileForm
+from users.models import User
 from django.contrib import auth, messages
 from django.urls import reverse
 from baskets.models import Basket
 from django.contrib.auth.decorators import login_required
-
+from django.conf import settings
 
 
 # Create your views here.
@@ -28,8 +30,9 @@ def registrations(request):
     if request.method == 'POST':
         form = UserRegistrationForm(data=request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Регистрация успешна!')
+            user = form.save()
+            if send_verify_link(user):
+                messages.success(request, 'Регистрация успешна!')
             return HttpResponseRedirect(reverse('users:login'))
     else:
         form = UserRegistrationForm()
@@ -41,6 +44,7 @@ def registrations(request):
 def logout(request):
     auth.logout(request)
     return HttpResponseRedirect(reverse('index'))
+
 
 @login_required
 def profile(request):
@@ -56,3 +60,25 @@ def profile(request):
                'baskets': Basket.objects.filter(user=request.user)}
     return render(request, 'users/profile.html', context)
 
+
+def verify(request, email, activation_key):
+    user = User.objects.filter(email=email).first()
+    if user:
+        if user.active_key == activation_key and not user.active_key_expired():
+            user.is_active = True
+            user.save()
+
+            messages.success(request, 'Аккаунт успешно подтвержден!')
+        else:
+            messages.success(request, 'Аккаунт не подтвержден')
+
+        return HttpResponseRedirect(reverse('users:login'))
+
+    return HttpResponseRedirect(reverse('index'))
+
+
+def send_verify_link(user):
+    subj = 'Verify ur account'
+    link = reverse('users:verify', args=[user.email, user.active_key])
+    message = f'{settings.DOMAIN}{link}'
+    return send_mail(subject=subj, message=message, from_email=settings.EMAIL_HOST_USER, recipient_list=[user.email])
