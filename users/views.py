@@ -1,6 +1,6 @@
 from django.core.mail import send_mail
 from django.shortcuts import render, HttpResponseRedirect
-from users.forms import UserLoginForm, UserRegistrationForm, UserProfileForm
+from users.forms import UserLoginForm, UserRegistrationForm, UserProfileForm, UserProfileEdit
 from users.models import User
 from django.contrib import auth, messages
 from django.urls import reverse
@@ -50,14 +50,17 @@ def logout(request):
 def profile(request):
     if request.method == 'POST':
         form = UserProfileForm(instance=request.user, files=request.FILES, data=request.POST)
+        profile_form = UserProfileEdit(instance=request.user.userprofile, data=request.POST)
         if form.is_valid():
             form.save()
             return HttpResponseRedirect(reverse('users:profile'))
     else:
         form = UserProfileForm(instance=request.user)
+        profile_form = UserProfileEdit(instance=request.user.userprofile)
     context = {'title': 'Личный кабинет',
                'form': form,
-               'baskets': Basket.objects.filter(user=request.user)}
+               'baskets': Basket.objects.filter(user=request.user),
+               'profile': profile_form}
     return render(request, 'users/profile.html', context)
 
 
