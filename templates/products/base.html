@@ -57,7 +57,7 @@
                         </li>
                     {% endif %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'users:profile' %}">
+                        <a class="nav-link" href="{% url 'ordersapp:order_list' %}">
                             <i class="fas fa-shopping-basket"></i>
                             {% if basket %}
                                 {{ basket.0.total_sum|floatformat:0 }} руб ({{ basket.0.total_quantity }} шт)
