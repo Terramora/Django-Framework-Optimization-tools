@@ -10,6 +10,10 @@ class OrderForm(forms.ModelForm):
 
 
 class OrderItemsForm(forms.ModelForm):
+    price = forms.CharField(label='цена', required=False, widget=forms.TextInput(attrs={
+        'readonly': True
+    }))
+
     class Meta:
         model = OrderItem
         exclude = ()
